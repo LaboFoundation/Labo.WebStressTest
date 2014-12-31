@@ -25,7 +25,7 @@
                 return m_QueryData ?? (m_QueryData = new NameValueCollection());
             }
 
-            private set
+            set
             {
                 m_QueryData = value;
             }
@@ -40,7 +40,7 @@
                 return m_RequestHeaders ?? (m_RequestHeaders = new NameValueCollection());
             }
 
-            private set
+            set
             {
                 m_RequestHeaders = value;
             }
@@ -55,7 +55,7 @@
                 return m_PostData ?? (m_PostData = new NameValueCollection());
             }
 
-            private set
+            set
             {
                 m_PostData = value;
             }
@@ -70,7 +70,7 @@
                 return m_ResponseHeaders ?? (m_ResponseHeaders = new NameValueCollection());
             }
 
-            private set
+            set
             {
                 m_ResponseHeaders = value;
             }

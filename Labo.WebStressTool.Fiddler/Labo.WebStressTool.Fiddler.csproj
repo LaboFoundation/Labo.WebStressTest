@@ -43,7 +43,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DefaultBinarySerializer.cs" />
     <Compile Include="FiddlerHttpRequestRecordCollector.cs" />
+    <Compile Include="HttpRequestRecordManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

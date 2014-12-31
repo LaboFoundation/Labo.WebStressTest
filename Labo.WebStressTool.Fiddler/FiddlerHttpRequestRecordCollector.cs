@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace Labo.WebStressTool.Fiddler
 {
@@ -20,11 +21,13 @@ namespace Labo.WebStressTool.Fiddler
     {
         private readonly int? m_FiddlerPort;
 
-        private readonly HttpRequestRecordCollection m_HttpRequestRecordCollection;
+        private HttpRequestRecordCollection m_HttpRequestRecordCollection;
 
         private readonly List<string> m_HttpMethodsToCollect;
 
         private List<string> m_HostNamesToCollect;
+
+        private List<string> m_RegexToExcludeUrls;
 
         private List<string> m_FileExtensionsToExclude;
 
@@ -54,6 +57,19 @@ namespace Labo.WebStressTool.Fiddler
             set
             {
                 m_HostNamesToCollect = value;
+            }
+        }
+
+        public List<string> RegexToExcludeUrls
+        {
+            get
+            {
+                return m_RegexToExcludeUrls ?? (m_RegexToExcludeUrls = new List<string>());
+            }
+
+            set
+            {
+                m_RegexToExcludeUrls = value;
             }
         }
 
@@ -98,6 +114,11 @@ namespace Labo.WebStressTool.Fiddler
             m_HttpRequestRecordCollection.Clear();
         }
 
+        public void SetCollectedRecords(HttpRequestRecordCollection records)
+        {
+            m_HttpRequestRecordCollection = records;
+        }
+
         private void FiddlerBeforeResponse(Session session)
         {
             Uri uri = new Uri(session.fullUrl);
@@ -107,6 +128,11 @@ namespace Labo.WebStressTool.Fiddler
             }
 
             if (HostNamesToCollect.Count > 0 && !HostNamesToCollect.Any(x => string.Equals(x, GetHostAndPort(uri), StringComparison.OrdinalIgnoreCase)))
+            {
+                return;
+            }
+
+            if (RegexToExcludeUrls.Count > 0 && RegexToExcludeUrls.Any(x => Regex.IsMatch(uri.ToString(), x, RegexOptions.IgnoreCase)))
             {
                 return;
             }

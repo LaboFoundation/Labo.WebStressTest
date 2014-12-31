@@ -12,6 +12,7 @@
     public partial class FiddlerForm : Form
     {
         private readonly FiddlerHttpRequestRecordCollector m_FiddlerHttpRequestRecordCollector;
+        private readonly HttpRequestRecordManager m_HttpRequestRecordManager;
 
         public IList<HttpRequestRecord> Records
         {
@@ -29,12 +30,19 @@
             m_FiddlerHttpRequestRecordCollector.HttpRequestRecordReceived += FiddlerHttpRequestRecordCollectorHttpRequestRecordReceived;
             txtFileExtensionsToExclude.Text = @".css|.js|.gif|.jpg|.jpeg|.bmp|.ico|.png|.axd";
 
+            m_HttpRequestRecordManager = new HttpRequestRecordManager();
+
             UpdateRecordButtons(false);
         }
 
         private void FiddlerHttpRequestRecordCollectorHttpRequestRecordReceived(FiddlerHttpRequestRecordCollector collector, HttpRequestRecord record)
         {
-            MethodInvoker addListBoxItem = () => listBoxRecord.Items.Add(string.Format("{0}{1} : {2}", record.Method, (record.ResponseStatus > 0) ? string.Format("({0} {1})", record.ResponseStatus, Enum.GetName(typeof(System.Net.HttpStatusCode), record.ResponseStatus)) : null, record.Uri.AbsoluteUri));
+            AddRecordToListBox(record);
+        }
+
+        private void AddRecordToListBox(HttpRequestRecord record)
+        {
+            MethodInvoker addListBoxItem = () => listBoxRecord.Items.Add(string.Format("{0}{1} : {2}", record.Method, (record.ResponseStatus > 0) ? string.Format("({0} {1})", record.ResponseStatus, Enum.GetName(typeof (System.Net.HttpStatusCode), record.ResponseStatus)) : null, record.Uri.AbsoluteUri));
             if (listBoxRecord.InvokeRequired)
             {
                 listBoxRecord.Invoke(new MethodInvoker(addListBoxItem));
@@ -50,7 +58,8 @@
             UpdateRecordButtons(true);
 
             m_FiddlerHttpRequestRecordCollector.FileExtensionsToExclude = txtFileExtensionsToExclude.Text.Split(new[] { "|" }, StringSplitOptions.RemoveEmptyEntries).ToList();
-            m_FiddlerHttpRequestRecordCollector.HostNamesToCollect = txtDomainsToCollect.Text.Split(new[] { Environment.CommandLine }, StringSplitOptions.RemoveEmptyEntries).ToList();
+            m_FiddlerHttpRequestRecordCollector.HostNamesToCollect = txtDomainsToCollect.Text.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries).ToList();
+            m_FiddlerHttpRequestRecordCollector.RegexToExcludeUrls = txtRegexToExcludeUrls.Text.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries).ToList();
             m_FiddlerHttpRequestRecordCollector.StartCollecting();
         }
 
@@ -102,6 +111,41 @@
         private void FiddlerForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             m_FiddlerHttpRequestRecordCollector.StopCollecting();
+        }
+
+        private void btnSaveCollectedData_Click(object sender, EventArgs e)
+        {
+            IList<HttpRequestRecord> httpRequestRecords = m_FiddlerHttpRequestRecordCollector.Records;
+            if (httpRequestRecords.Count == 0)
+            {
+                MessageBox.Show("There is no records to save!");
+            }
+
+            if (sfdCollectedData.ShowDialog() == DialogResult.OK)
+            {
+                m_HttpRequestRecordManager.Save(new HttpRequestRecordCollection(httpRequestRecords), sfdCollectedData.FileName);
+
+                MessageBox.Show("Records saved!");
+            }
+        }
+
+        private void btnLoadCollectedData_Click(object sender, EventArgs e)
+        {
+            if (ofdCollectedData.ShowDialog() == DialogResult.OK)
+            {
+                HttpRequestRecordCollection httpRequestRecordCollection = m_HttpRequestRecordManager.Load(ofdCollectedData.FileName);
+
+                m_FiddlerHttpRequestRecordCollector.SetCollectedRecords(httpRequestRecordCollection);
+
+                listBoxRecord.Items.Clear();
+
+                for (int i = 0; i < httpRequestRecordCollection.Count; i++)
+                {
+                    HttpRequestRecord httpRequestRecord = httpRequestRecordCollection[i];
+
+                    AddRecordToListBox(httpRequestRecord);
+                }
+            }
         }
     }
 }
