@@ -1,4 +1,6 @@
-﻿namespace Labo.WebStressTool.Fiddler
+﻿using System.Globalization;
+
+namespace Labo.WebStressTool.Fiddler
 {
     using System;
     using System.Collections.Generic;
@@ -104,7 +106,7 @@
                 return;
             }
 
-            if (HostNamesToCollect.Count > 0 && !HostNamesToCollect.Any(x => string.Equals(x, uri.Host, StringComparison.OrdinalIgnoreCase)))
+            if (HostNamesToCollect.Count > 0 && !HostNamesToCollect.Any(x => string.Equals(x, GetHostAndPort(uri), StringComparison.OrdinalIgnoreCase)))
             {
                 return;
             }
@@ -139,6 +141,11 @@
             m_HttpRequestRecordCollection.Add(httpRequestRecord);
 
             HttpRequestRecordReceived(this, httpRequestRecord);
+        }
+
+        private static string GetHostAndPort(Uri uri)
+        {
+            return uri.IsDefaultPort ? uri.Host : string.Format(CultureInfo.InvariantCulture, "{0}:{1}", uri.Host, uri.Port);
         }
 
         private static NameValueCollection GetRequestPostAsDictionary(string post)

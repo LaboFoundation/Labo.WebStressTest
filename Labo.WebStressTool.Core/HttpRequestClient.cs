@@ -1,7 +1,6 @@
 ﻿namespace Labo.WebStressTool.Core
 {
     using System;
-    using System.Collections.Generic;
     using System.Collections.Specialized;
     using System.Globalization;
     using System.IO;
@@ -89,14 +88,17 @@
 
         private HttpWebRequest CreateWebRequest(Uri uri)
         {
+            const string userAgent = "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)";
+
             HttpWebRequest headRequest = (HttpWebRequest)WebRequest.Create(uri);
-            headRequest.AllowAutoRedirect = false;
+            headRequest.AllowAutoRedirect = true;
             headRequest.Method = "HEAD";
+            headRequest.UserAgent = userAgent;
             WebResponse webResponse = headRequest.GetResponse();
             Uri redirectedUri = webResponse.ResponseUri;
 
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(redirectedUri);
-            request.UserAgent = "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)";
+            request.UserAgent = userAgent;
             request.ServicePoint.Expect100Continue = false;
             request.Timeout = 15 * 1000;
 
@@ -159,7 +161,7 @@
             MemoryStream requestStream = new MemoryStream();
 
             bool first = true;
-            foreach (KeyValuePair<string, string> field in m_RequestData)
+            foreach (string field in m_RequestData)
             {
                 if (!first)
                 {
@@ -168,7 +170,7 @@
 
                 first = false;
 
-                WriteUrlEncoded(requestStream, field.Key, field.Value);
+                WriteUrlEncoded(requestStream, field, m_RequestData[field]);
             }
 
             return requestStream;
@@ -178,7 +180,7 @@
         {
             StringBuilder queryString = new StringBuilder();
             bool first = true;
-            foreach (KeyValuePair<string, string> field in m_RequestData)
+            foreach (string field in m_RequestData)
             {
                 if (!first)
                 {
@@ -187,9 +189,9 @@
 
                 first = false;
 
-                queryString.Append(field.Key);
+                queryString.Append(field);
                 queryString.Append("=");
-                queryString.Append(Uri.EscapeDataString(field.Value));
+                queryString.Append(Uri.EscapeDataString(m_RequestData[field]));
             }
 
             return queryString.ToString();
