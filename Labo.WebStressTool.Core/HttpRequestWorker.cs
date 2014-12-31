@@ -101,6 +101,12 @@
                     success = false;
                     FailCount++;
                 }
+                catch (Exception ex)
+                {
+                    exception = ex;
+                    success = false;
+                    FailCount++;
+                }
                 finally
                 {
                     TotalCount++;
@@ -110,10 +116,13 @@
 
                 double elsapsedMilliSeconds = sw.Elapsed.TotalMilliseconds;
 
-                TotalMilliSeconds += elsapsedMilliSeconds;
+                TotalMilliSeconds = elsapsedMilliSeconds;
 
                 HttpRequestProcessed onHttpRequestProcessed = HttpRequestProcessed;
-                onHttpRequestProcessed(this, new HttpRequestProcessedResult(m_Record, success, elsapsedMilliSeconds, httpStatusCode, exception, LastExceptionStatus));
+                if (onHttpRequestProcessed != null)
+                {
+                    onHttpRequestProcessed(this, new HttpRequestProcessedResult(m_Record, success, elsapsedMilliSeconds, httpStatusCode, exception, LastExceptionStatus));
+                }
 
                 IsRunning = false;
 
