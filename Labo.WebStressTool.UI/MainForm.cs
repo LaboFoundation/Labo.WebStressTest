@@ -103,6 +103,18 @@
             }
         }
 
+        private void UpdateRealTimeRequestCount(int count)
+        {
+            if (lblRealTimeRequestsCount.InvokeRequired)
+            {
+                lblRealTimeRequestsCount.Invoke(new MethodInvoker(() => lblRealTimeRequestsCount.Text = count.ToString(CultureInfo.InvariantCulture)));
+            }
+            else
+            {
+                lblRealTimeRequestsCount.Text = count.ToString(CultureInfo.InvariantCulture);
+            }
+        }
+
         private void UpdateRunningRequestCount(int count)
         {
             if (lblRunningRequestsCount.InvokeRequired)
@@ -214,6 +226,11 @@
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             StopHttpRequestWorkerQueue(false);
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            UpdateRealTimeRequestCount(RealTimeRequestCounter.RequestCount);
         }
     }
 }
