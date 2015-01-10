@@ -97,6 +97,12 @@
                 catch (WebException ex)
                 {
                     LastExceptionStatus = ex.Status;
+                    HttpWebResponse httpWebResponse = ex.Response as HttpWebResponse;
+                    if (httpWebResponse != null)
+                    {
+                        httpStatusCode = httpWebResponse.StatusCode;
+                    }
+
                     exception = ex;
                     success = false;
                     FailCount++;
@@ -116,7 +122,7 @@
 
                 double elsapsedMilliSeconds = sw.Elapsed.TotalMilliseconds;
 
-                TotalMilliSeconds = elsapsedMilliSeconds;
+                TotalMilliSeconds += elsapsedMilliSeconds;
 
                 HttpRequestProcessed onHttpRequestProcessed = HttpRequestProcessed;
                 if (onHttpRequestProcessed != null)

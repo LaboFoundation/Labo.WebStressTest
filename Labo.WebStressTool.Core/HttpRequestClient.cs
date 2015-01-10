@@ -49,27 +49,64 @@
 
         public HttpWebResponse GetWebResponse()
         {
-            HttpWebRequest request = m_RequestData.Count == 0 ? CreateWebRequest() : CreateWebRequest(new Uri(string.Format("{0}?{1}", m_URL, GetRequestParameters())));
-            request.Method = "GET";
+            const string method = "GET";
+
+            HttpWebRequest request = m_RequestData.Count == 0 ? CreateWebRequest(method) : CreateWebRequest(new Uri(string.Format("{0}?{1}", m_URL, GetRequestParameters())), method);
+            request.Method = method;
 
             return (HttpWebResponse)request.GetResponse();
         }
 
+        public HttpWebResponse PostJson(string requestContent)
+        {
+            const string method = "POST";
+
+            HttpWebRequest request = CreateWebRequest(method);
+            request.Method = method;
+            request.ContentType = "application/json";
+
+            using (MemoryStream data = GetJsonData(requestContent))
+            {
+                request.ContentLength = data.Length;
+
+                Stream requestStream = request.GetRequestStream();
+
+                data.WriteTo(requestStream);
+
+                HttpWebResponse httpWebResponse = (HttpWebResponse)request.GetResponse();
+
+                return httpWebResponse;
+            }
+        }
+
+        private static MemoryStream GetJsonData(string requestContent)
+        {
+            MemoryStream data = new MemoryStream();
+            byte[] dataBytes = Encoding.UTF8.GetBytes(string.Format(CultureInfo.InvariantCulture, "\r\n{0}", requestContent));
+            data.Write(dataBytes, 0, dataBytes.Length);
+            return data;
+        }
+
         public HttpWebResponse PostUrlEncoded()
         {
-            HttpWebRequest request = CreateWebRequest();
-            request.Method = "POST";
+            const string method = "POST";
+
+            HttpWebRequest request = CreateWebRequest(method);
+            request.Method = method;
             request.ContentType = "application/x-www-form-urlencoded";
 
-            MemoryStream data = GetUrlEncodedData();
+            using (MemoryStream data = GetUrlEncodedData())
+            {
+                request.ContentLength = data.Length;
 
-            request.ContentLength = data.Length;
+                Stream requestStream = request.GetRequestStream();
 
-            Stream requestStream = request.GetRequestStream();
+                data.WriteTo(requestStream);
 
-            data.WriteTo(requestStream);
+                HttpWebResponse httpWebResponse = (HttpWebResponse)request.GetResponse();
 
-            return (HttpWebResponse)request.GetResponse();
+                return httpWebResponse;
+            }
         }
 
         private static void WriteUrlEncoded(Stream stream, string key, string value)
@@ -81,23 +118,26 @@
             stream.Write(valueBytes, 0, valueBytes.Length);
         }
 
-        private HttpWebRequest CreateWebRequest()
+        private HttpWebRequest CreateWebRequest(string method)
         {
-            return CreateWebRequest(m_URL);
+            return CreateWebRequest(m_URL, method);
         }
 
-        private HttpWebRequest CreateWebRequest(Uri uri)
+        private HttpWebRequest CreateWebRequest(Uri uri, string method)
         {
             const string userAgent = "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)";
 
-            HttpWebRequest headRequest = (HttpWebRequest)WebRequest.Create(uri);
-            headRequest.AllowAutoRedirect = true;
-            headRequest.Method = "HEAD";
-            headRequest.UserAgent = userAgent;
-            WebResponse webResponse = headRequest.GetResponse();
-            Uri redirectedUri = webResponse.ResponseUri;
+            if (method != "POST")
+            {
+                HttpWebRequest headRequest = (HttpWebRequest)WebRequest.Create(uri);
+                headRequest.AllowAutoRedirect = true;
+                headRequest.Method = "HEAD";
+                headRequest.UserAgent = userAgent;
+                WebResponse webResponse = headRequest.GetResponse();
+                uri = webResponse.ResponseUri;
+            }
 
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(redirectedUri);
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
             request.UserAgent = userAgent;
             request.ServicePoint.Expect100Continue = false;
             request.Timeout = 15 * 1000;

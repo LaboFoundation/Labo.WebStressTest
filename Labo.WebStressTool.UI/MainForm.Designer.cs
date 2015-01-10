@@ -49,6 +49,11 @@
             this.lblRunningRequestsCount = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.lblQueueLength = new System.Windows.Forms.Label();
+            this.lblSuccessfulRequestsCount = new System.Windows.Forms.Label();
+            this.label9 = new System.Windows.Forms.Label();
+            this.lblTotalRequestsCount = new System.Windows.Forms.Label();
+            this.label11 = new System.Windows.Forms.Label();
+            this.columnHttpStatus = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.mainMenuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudDurationInMinutes)).BeginInit();
             this.SuspendLayout();
@@ -133,11 +138,12 @@
             this.lvRequests.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnUrl,
             this.columnStatus,
+            this.columnHttpStatus,
             this.columnTime});
             this.lvRequests.FullRowSelect = true;
             this.lvRequests.GridLines = true;
             this.lvRequests.HideSelection = false;
-            this.lvRequests.Location = new System.Drawing.Point(15, 94);
+            this.lvRequests.Location = new System.Drawing.Point(12, 94);
             this.lvRequests.MultiSelect = false;
             this.lvRequests.Name = "lvRequests";
             this.lvRequests.ShowGroups = false;
@@ -157,11 +163,12 @@
             // 
             // columnTime
             // 
+            this.columnTime.DisplayIndex = 2;
             this.columnTime.Text = "Time";
             // 
             // btnStartStressTest
             // 
-            this.btnStartStressTest.Location = new System.Drawing.Point(486, 415);
+            this.btnStartStressTest.Location = new System.Drawing.Point(486, 458);
             this.btnStartStressTest.Name = "btnStartStressTest";
             this.btnStartStressTest.Size = new System.Drawing.Size(102, 29);
             this.btnStartStressTest.TabIndex = 8;
@@ -211,7 +218,7 @@
             // 
             // btnStopStressTest
             // 
-            this.btnStopStressTest.Location = new System.Drawing.Point(387, 415);
+            this.btnStopStressTest.Location = new System.Drawing.Point(387, 458);
             this.btnStopStressTest.Name = "btnStopStressTest";
             this.btnStopStressTest.Size = new System.Drawing.Size(93, 29);
             this.btnStopStressTest.TabIndex = 12;
@@ -259,11 +266,60 @@
             this.lblQueueLength.TabIndex = 16;
             this.lblQueueLength.Text = "0";
             // 
+            // lblSuccessfulRequestsCount
+            // 
+            this.lblSuccessfulRequestsCount.AutoSize = true;
+            this.lblSuccessfulRequestsCount.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.lblSuccessfulRequestsCount.Location = new System.Drawing.Point(351, 430);
+            this.lblSuccessfulRequestsCount.Name = "lblSuccessfulRequestsCount";
+            this.lblSuccessfulRequestsCount.Size = new System.Drawing.Size(14, 15);
+            this.lblSuccessfulRequestsCount.TabIndex = 20;
+            this.lblSuccessfulRequestsCount.Text = "0";
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.label9.Location = new System.Drawing.Point(202, 430);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(144, 15);
+            this.label9.TabIndex = 19;
+            this.label9.Text = "Successful Requests:";
+            // 
+            // lblTotalRequestsCount
+            // 
+            this.lblTotalRequestsCount.AutoSize = true;
+            this.lblTotalRequestsCount.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.lblTotalRequestsCount.Location = new System.Drawing.Point(351, 411);
+            this.lblTotalRequestsCount.Name = "lblTotalRequestsCount";
+            this.lblTotalRequestsCount.Size = new System.Drawing.Size(14, 15);
+            this.lblTotalRequestsCount.TabIndex = 18;
+            this.lblTotalRequestsCount.Text = "0";
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.label11.Location = new System.Drawing.Point(202, 411);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(107, 15);
+            this.label11.TabIndex = 17;
+            this.label11.Text = "Total Requests:";
+            // 
+            // columnHttpStatus
+            // 
+            this.columnHttpStatus.Text = "Http Status";
+            this.columnHttpStatus.Width = 67;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(597, 456);
+            this.ClientSize = new System.Drawing.Size(597, 493);
+            this.Controls.Add(this.lblSuccessfulRequestsCount);
+            this.Controls.Add(this.label9);
+            this.Controls.Add(this.lblTotalRequestsCount);
+            this.Controls.Add(this.label11);
             this.Controls.Add(this.lblQueueLength);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.lblRunningRequestsCount);
@@ -316,6 +372,11 @@
         private System.Windows.Forms.Label lblRunningRequestsCount;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label lblQueueLength;
+        private System.Windows.Forms.Label lblSuccessfulRequestsCount;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Label lblTotalRequestsCount;
+        private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.ColumnHeader columnHttpStatus;
     }
 }
 

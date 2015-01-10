@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.Net;
     using System.Threading;
     using System.Windows.Forms;
 
@@ -17,6 +18,8 @@
         private HttpRequestWorkerQueue m_HttpRequestWorkerQueue;
 
         private bool m_Running;
+
+        private int m_SuccessfulRequestCount;
 
         public MainForm()
         {
@@ -67,7 +70,7 @@
                         m_Running = false;
 
                         //TODO: Set status as shutting down
-                        StopHttpRequestWorkerQueue(true);
+                        StopHttpRequestWorkerQueue(false);
                     };
                 timer.Start();
 
@@ -95,36 +98,29 @@
                         addedRequests++;
                     }
 
-                    if (addedRequests >= maxQueueLength)
-                    {
-                        break;
-                    }
+                    //if (addedRequests >= maxQueueLength)
+                    //{
+                    //    break;
+                    //}
                 }
             }
         }
 
-        private void UpdateRunningRequestCount(int count)
+        private static void UpdateCountLabel(Label label, int count)
         {
-            if (lblRunningRequestsCount.InvokeRequired)
+            if (label.InvokeRequired)
             {
-                lblRunningRequestsCount.Invoke(new MethodInvoker(() => lblRunningRequestsCount.Text = count.ToString(CultureInfo.InvariantCulture)));
+                label.Invoke(new MethodInvoker(() => label.Text = count.ToString(CultureInfo.InvariantCulture)));
             }
             else
             {
-                lblRunningRequestsCount.Text = count.ToString(CultureInfo.InvariantCulture);
+                label.Text = count.ToString(CultureInfo.InvariantCulture);
             }
         }
 
         private void UpdateQueueLength(int count)
         {
-            if (lblQueueLength.InvokeRequired)
-            {
-                lblQueueLength.Invoke(new MethodInvoker(() => lblQueueLength.Text = count.ToString(CultureInfo.InvariantCulture)));
-            }
-            else
-            {
-                lblQueueLength.Text = count.ToString(CultureInfo.InvariantCulture);
-            }
+            UpdateCountLabel(lblQueueLength, count);
         }
 
         private List<HttpRequestWorker> CreateHttpRequestWorkers(int maxSleepTime, Random random, int minSleepTime)
@@ -144,9 +140,15 @@
                             {
                                 ListViewItem item = new ListViewItem(result.HttpRequestRecord.Uri.ToString());
                                 item.SubItems.Add(result.Success ? "Success" : "Fail");
+                                item.SubItems.Add(GetHttpStatusText(result.HttpResponseStatusCode));
                                 item.SubItems.Add(result.ElapsedMilliseconds.ToString(CultureInfo.InvariantCulture));
                                 lvRequests.Items.Add(item);
                             };
+
+                        if (result.Success)
+                        {
+                            Interlocked.Increment(ref m_SuccessfulRequestCount);
+                        }
 
                         if (lvRequests.InvokeRequired)
                         {
@@ -161,6 +163,13 @@
                 httpRequestWorkers.Add(httpRequestWorker);
             }
             return httpRequestWorkers;
+        }
+
+        private static string GetHttpStatusText(HttpStatusCode? httpResponseStatusCode)
+        {
+            return httpResponseStatusCode.HasValue ? 
+                string.Format(CultureInfo.CurrentCulture, "{1} ({0})", httpResponseStatusCode, (int)httpResponseStatusCode) 
+                : string.Empty;
         }
 
         private void StopHttpRequestWorkerQueue(bool waitForHttpRequestWorkers)
@@ -183,22 +192,29 @@
 
         private void HttpRequestWorkerQueue_OnRequestWorkerCompleted(object sender, EventArgs e)
         {
-            ThreadPool.QueueUserWorkItem(x => UpdateRunningRequestCount(m_HttpRequestWorkerQueue.RunningWorkersCount));
+            ThreadPool.QueueUserWorkItem(x => UpdateStatistics());
         }
 
         private void HttpRequestWorkerQueue_OnHttpRequestWorkerQueueShutDown(object sender, EventArgs e)
         {
-            ThreadPool.QueueUserWorkItem(x => UpdateRunningRequestCount(m_HttpRequestWorkerQueue.RunningWorkersCount));
+            ThreadPool.QueueUserWorkItem(x => UpdateStatistics());
         }
 
         private void HttpRequestWorkerQueue_OnRequestWorkerStarting(object sender, EventArgs e)
         {
-            ThreadPool.QueueUserWorkItem(x => UpdateRunningRequestCount(m_HttpRequestWorkerQueue.RunningWorkersCount));
+            ThreadPool.QueueUserWorkItem(x => UpdateStatistics());
         }
 
         private void HttpRequestWorkerQueue_OnRequestQueueUpdated(object sender, HttpRequestWorkerQueue.RequestQueueUpdatedEventArgs e)
         {
             ThreadPool.QueueUserWorkItem(x => UpdateQueueLength(e.QueueLength));
+        }
+
+        private void UpdateStatistics()
+        {
+            UpdateCountLabel(lblRunningRequestsCount, m_HttpRequestWorkerQueue.RunningWorkersCount);
+            UpdateCountLabel(lblTotalRequestsCount, m_HttpRequestWorkerQueue.TotalRequestsCompleted);
+            UpdateCountLabel(lblSuccessfulRequestsCount, m_SuccessfulRequestCount);
         }
 
         private void btnStopStressTest_Click(object sender, EventArgs e)

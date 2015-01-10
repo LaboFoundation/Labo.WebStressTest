@@ -1,13 +1,13 @@
 ﻿namespace Labo.WebStressTool.Core
 {
     using System;
-    using System.Collections.Generic;
     using System.Collections.Specialized;
-    using System.Linq;
 
     [Serializable]
     public sealed class HttpRequestRecord
     {
+        
+
         private NameValueCollection m_QueryData;
 
         private NameValueCollection m_PostData;
@@ -16,6 +16,8 @@
 
         private NameValueCollection m_ResponseHeaders;
 
+        public string ContentType { get; private set; }
+        
         public Uri Uri { get; private set; }
 
         public NameValueCollection QueryData
@@ -88,8 +90,9 @@
             get { return IsAjaxRequest && string.Equals(RequestHeaders["X-MicrosoftAjax"], "Delta=true", StringComparison.OrdinalIgnoreCase); }
         }
 
-        public HttpRequestRecord(Uri uri, NameValueCollection queryData, string method, NameValueCollection requestHeaders, string requestContent, NameValueCollection postData, int responseStatus, NameValueCollection responseHeaders, string responseContent)
+        public HttpRequestRecord(Uri uri, NameValueCollection queryData, string method, NameValueCollection requestHeaders, string requestContent, string contentType, NameValueCollection postData, int responseStatus, NameValueCollection responseHeaders, string responseContent)
         {
+            
             if (uri == null)
             {
                 throw new ArgumentNullException("uri");
@@ -100,6 +103,7 @@
                 throw new ArgumentNullException("method");
             }
 
+            ContentType = contentType;
             QueryData = queryData;
             Uri = uri;
             Method = method;

@@ -151,7 +151,9 @@ namespace Labo.WebStressTool.Fiddler
             }
 
             string requestContent = (session.RequestBody != null) && (session.RequestBody.Length > 0) ? CONFIG.oHeaderEncoding.GetString(session.RequestBody) : null;
-            NameValueCollection postData = !string.Equals(method, "POST", StringComparison.OrdinalIgnoreCase) || string.IsNullOrWhiteSpace(requestContent) ? null : GetRequestPostAsDictionary(requestContent);
+            string requestContentType = requestHeaders["Content-Type"] ?? string.Empty;
+
+            NameValueCollection postData = !string.Equals(method, "POST", StringComparison.OrdinalIgnoreCase) || requestContentType == "application/json" || string.IsNullOrWhiteSpace(requestContent) ? null : GetRequestPostAsDictionary(requestContent);
             int responseStatus = session.responseCode;
 
             NameValueCollection responseHeaders = new NameValueCollection();
@@ -162,7 +164,7 @@ namespace Labo.WebStressTool.Fiddler
 
             string responseContent = (session.ResponseBody != null && session.ResponseBody.Length > 0) ? CONFIG.oHeaderEncoding.GetString(session.ResponseBody) : null;
 
-            HttpRequestRecord httpRequestRecord = new HttpRequestRecord(uri, queryData, method, requestHeaders, requestContent, postData, responseStatus, responseHeaders, responseContent);
+            HttpRequestRecord httpRequestRecord = new HttpRequestRecord(uri, queryData, method, requestHeaders, requestContent, requestContentType, postData, responseStatus, responseHeaders, responseContent);
            
             m_HttpRequestRecordCollection.Add(httpRequestRecord);
 
