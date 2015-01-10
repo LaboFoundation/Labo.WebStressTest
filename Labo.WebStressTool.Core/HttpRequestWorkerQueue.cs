@@ -37,13 +37,43 @@
         private readonly object m_Locker = new object();
         private readonly Thread[] m_Workers;
 
+        private DateTime? m_StartDate;
+
+        private DateTime? m_EndDate;
+
         private int m_RunningWorkersCount;
+
+        private int m_TotalRequestsCompleted;
 
         public int RunningWorkersCount
         {
             get
             {
                 return m_RunningWorkersCount;
+            }
+        }
+
+        public int TotalRequestsCompleted
+        {
+            get
+            {
+                return m_TotalRequestsCompleted;
+            }
+        }
+
+        public DateTime? StartDate
+        {
+            get
+            {
+                return m_StartDate;
+            }
+        }
+
+        public DateTime? EndDate
+        {
+            get
+            {
+                return m_EndDate;
             }
         }
 
@@ -64,14 +94,24 @@
             {
                 m_HttpRequestWorkersQueue.Enqueue(httpRequestWorker);
 
-                OnRequestQueueUpdated(this, new RequestQueueUpdatedEventArgs(m_HttpRequestWorkersQueue.Count(x => x != null)));
+                OnRequestQueueUpdated(this, new RequestQueueUpdatedEventArgs(QueueLength));
 
                 Monitor.Pulse(m_Locker);
             }
         }
 
+        public int QueueLength
+        {
+            get
+            {
+                return m_HttpRequestWorkersQueue.Count(x => x != null);
+            }
+        }
+
         public void Start()
         {
+            m_StartDate = DateTime.Now;
+
             for (int i = 0; i < m_Workers.Length; i++)
             {
                 Thread worker = m_Workers[i];
@@ -111,6 +151,8 @@
 
             m_HttpRequestWorkersQueue.Clear();
 
+            m_EndDate = DateTime.Now;
+
             OnHttpRequestWorkerQueueShutDown(this, EventArgs.Empty);
         }
 
@@ -128,7 +170,7 @@
 
                     httpRequestWorker = m_HttpRequestWorkersQueue.Dequeue();
 
-                    OnRequestQueueUpdated(this, new RequestQueueUpdatedEventArgs(m_HttpRequestWorkersQueue.Count(x => x != null)));
+                    OnRequestQueueUpdated(this, new RequestQueueUpdatedEventArgs(QueueLength));
                 }
 
                 if (httpRequestWorker == null)
@@ -147,6 +189,8 @@
                 finally 
                 {
                     Interlocked.Decrement(ref m_RunningWorkersCount);
+
+                    Interlocked.Increment(ref m_TotalRequestsCompleted);
 
                     OnRequestWorkerCompleted(this, EventArgs.Empty);
                 }
