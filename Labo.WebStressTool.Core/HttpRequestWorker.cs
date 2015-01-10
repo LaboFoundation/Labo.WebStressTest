@@ -89,13 +89,8 @@
 
                 try
                 {
-                    RealTimeRequestCounter.Increment();
-
-                    using (HttpWebResponse httpWebResponse = m_HttpRequestRecordProcessor.ProcessRecord(m_Record))
-                    {
-                        httpStatusCode = httpWebResponse.StatusCode;
-                    }
-
+                    HttpWebResponse httpWebResponse = m_HttpRequestRecordProcessor.ProcessRecord(m_Record);
+                    httpStatusCode = httpWebResponse.StatusCode;
                     success = true;
                     SucceessCount++;
                 }
@@ -115,8 +110,6 @@
                 finally
                 {
                     TotalCount++;
-
-                    RealTimeRequestCounter.Decrement();
                 }
 
                 sw.Stop();
