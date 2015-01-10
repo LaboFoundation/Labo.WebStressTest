@@ -104,7 +104,10 @@
         {
             get
             {
-                return m_HttpRequestWorkersQueue.Count(x => x != null);
+                lock (m_Locker)
+                {
+                    return m_HttpRequestWorkersQueue.Count(x => x != null);
+                }
             }
         }
 
@@ -149,7 +152,10 @@
                 m_Workers[i] = null;
             }
 
-            m_HttpRequestWorkersQueue.Clear();
+            lock (m_Locker)
+            {
+                m_HttpRequestWorkersQueue.Clear();
+            }
 
             m_EndDate = DateTime.Now;
 

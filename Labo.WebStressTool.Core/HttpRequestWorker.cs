@@ -14,6 +14,7 @@
 
         private readonly int m_FirstRunDelay;
         private bool m_Running;
+        private CookieCollection m_CookieCollection;
 
         public double AverageMilliSeconds
         {
@@ -59,6 +60,7 @@
             m_Record = record;
             m_FirstRunDelay = firstRunDelay;
             m_HttpRequestRecordProcessor = new HttpRequestRecordProcessor();
+            m_CookieCollection = new CookieCollection();
 
             SucceessCount = 0;
             FailCount = 0;
@@ -89,8 +91,10 @@
 
                 try
                 {
-                    HttpWebResponse httpWebResponse = m_HttpRequestRecordProcessor.ProcessRecord(m_Record);
+                    HttpWebResponse httpWebResponse = m_HttpRequestRecordProcessor.ProcessRecord(m_Record, m_CookieCollection);
                     httpStatusCode = httpWebResponse.StatusCode;
+                    MergeCookies(httpWebResponse);
+
                     success = true;
                     SucceessCount++;
                 }
@@ -137,6 +141,28 @@
                     Thread.Sleep(SleepTime);
                 }
             }
+        }
+
+        private void MergeCookies(HttpWebResponse httpWebResponse)
+        {
+            CookieCollection newCookieCollection = new CookieCollection();
+            CookieCollection responseCookies = httpWebResponse.Cookies;
+            foreach (Cookie cookie in m_CookieCollection)
+            {
+                Cookie responseCookie = responseCookies[cookie.Name];
+                newCookieCollection.Add(responseCookie ?? cookie);
+            }
+
+            foreach (Cookie cookie in responseCookies)
+            {
+                Cookie newCookie = newCookieCollection[cookie.Name];
+                if (newCookie == null)
+                {
+                    newCookieCollection.Add(cookie);                    
+                }
+            }
+
+            m_CookieCollection = newCookieCollection;
         }
     }
 }

@@ -19,16 +19,18 @@
         private readonly NameValueCollection m_RequestData;
 
         private readonly NameValueCollection m_RequestHeaders;
+        private readonly CookieCollection m_Cookies;
 
-        public HttpRequestClient(Uri url, NameValueCollection headers = null)
+        public HttpRequestClient(Uri url, NameValueCollection headers = null, CookieCollection cookies = null)
         {
             m_URL = url;
             m_RequestData = new NameValueCollection();
             m_RequestHeaders = headers;
+            m_Cookies = cookies ?? new CookieCollection();
         }
 
-        public HttpRequestClient(string url, NameValueCollection headers = null)
-            : this(new Uri(url), headers)
+        public HttpRequestClient(string url, NameValueCollection headers = null, CookieCollection cookies = null)
+            : this(new Uri(url), headers, cookies)
         {
         }
 
@@ -133,16 +135,30 @@
                 headRequest.AllowAutoRedirect = true;
                 headRequest.Method = "HEAD";
                 headRequest.UserAgent = userAgent;
+
+                // Create the cookie container and cookies.
+                headRequest.CookieContainer = new CookieContainer();
+                headRequest.CookieContainer.Add(m_Cookies);
+
                 WebResponse webResponse = headRequest.GetResponse();
                 uri = webResponse.ResponseUri;
             }
 
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
-            request.UserAgent = userAgent;
+            
+            // Create the cookie container and cookies.
+            request.CookieContainer = new CookieContainer();
+            request.CookieContainer.Add(m_Cookies);
+           
             request.ServicePoint.Expect100Continue = false;
             request.Timeout = 15 * 1000;
 
             SetRequestHeaders(request);
+
+            if (string.IsNullOrWhiteSpace(request.UserAgent))
+            {
+                request.UserAgent = userAgent;
+            }
 
             return request;
         }
