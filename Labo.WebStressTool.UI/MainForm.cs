@@ -2,12 +2,14 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Drawing;
     using System.Globalization;
     using System.Net;
     using System.Threading;
     using System.Windows.Forms;
 
     using Labo.WebStressTool.Core;
+    using Labo.WebStressTool.Core.Performance;
 
     using Timer = System.Timers.Timer;
 
@@ -21,9 +23,23 @@
 
         private int m_SuccessfulRequestCount;
 
+        private readonly PerformanceCounterManager m_PerformanceCounterManager;
+
         public MainForm()
         {
             InitializeComponent();
+
+            Disposed += MainForm_Disposed;
+
+            m_PerformanceCounterManager = new PerformanceCounterManager();
+        }
+
+        private void MainForm_Disposed(object sender, EventArgs e)
+        {
+            if (m_PerformanceCounterManager != null)
+            {
+                m_PerformanceCounterManager.Dispose();
+            }
         }
 
         private void fiddlerToolStripMenuItem_Click(object sender, EventArgs e)
@@ -32,6 +48,14 @@
             {
                 fiddlerForm.ShowDialog(this);
                 m_HttpRequestRecords = fiddlerForm.Records;
+            }
+        }
+
+        private void performanceToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (Form form = new PerformanceMonitorForm(m_PerformanceCounterManager))
+            {
+                form.ShowDialog(this);
             }
         }
 
@@ -97,11 +121,6 @@
 
                         addedRequests++;
                     }
-
-                    //if (addedRequests >= maxQueueLength)
-                    //{
-                    //    break;
-                    //}
                 }
             }
         }
@@ -162,6 +181,7 @@
 
                 httpRequestWorkers.Add(httpRequestWorker);
             }
+
             return httpRequestWorkers;
         }
 
@@ -230,6 +250,18 @@
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             StopHttpRequestWorkerQueue(false);
+        }
+
+        private void timerPerformanceInfo_Tick(object sender, EventArgs e)
+        {
+            PerformanceInfo currentInformation = m_PerformanceCounterManager.GetCurrentInformation();
+
+            toolStripStatusAvailableMemory.Text = string.Format(CultureInfo.CurrentCulture, "{0:N0} / {1:N0} Mb Memory Available", currentInformation.FreeMemory, currentInformation.TotalMemory);
+
+            int cpuUsage = currentInformation.CpuUsage;
+            toolStripStatusCpu.Text = string.Format(CultureInfo.CurrentCulture, "CPU usage {0}%", cpuUsage);
+
+            toolStripStatusCpu.Image = cpuImageList.Images[cpuUsage / 10];
         }
     }
 }

@@ -28,6 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.mainMenuStrip = new System.Windows.Forms.MenuStrip();
             this.fiddlerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mtxtMaxConcurrentRequests = new System.Windows.Forms.MaskedTextBox();
@@ -39,6 +41,7 @@
             this.lvRequests = new System.Windows.Forms.ListView();
             this.columnUrl = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnStatus = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHttpStatus = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnTime = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.btnStartStressTest = new System.Windows.Forms.Button();
             this.label4 = new System.Windows.Forms.Label();
@@ -53,18 +56,26 @@
             this.label9 = new System.Windows.Forms.Label();
             this.lblTotalRequestsCount = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
-            this.columnHttpStatus = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.statusBar = new System.Windows.Forms.StatusStrip();
+            this.toolStripStatusInfo = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusCpu = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusAvailableMemory = new System.Windows.Forms.ToolStripStatusLabel();
+            this.cpuImageList = new System.Windows.Forms.ImageList(this.components);
+            this.timerPerformanceInfo = new System.Windows.Forms.Timer(this.components);
+            this.performanceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudDurationInMinutes)).BeginInit();
+            this.statusBar.SuspendLayout();
             this.SuspendLayout();
             // 
             // mainMenuStrip
             // 
             this.mainMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.fiddlerToolStripMenuItem});
+            this.fiddlerToolStripMenuItem,
+            this.performanceToolStripMenuItem});
             this.mainMenuStrip.Location = new System.Drawing.Point(0, 0);
             this.mainMenuStrip.Name = "mainMenuStrip";
-            this.mainMenuStrip.Size = new System.Drawing.Size(597, 24);
+            this.mainMenuStrip.Size = new System.Drawing.Size(684, 24);
             this.mainMenuStrip.TabIndex = 0;
             this.mainMenuStrip.Text = "menuStrip1";
             // 
@@ -147,7 +158,7 @@
             this.lvRequests.MultiSelect = false;
             this.lvRequests.Name = "lvRequests";
             this.lvRequests.ShowGroups = false;
-            this.lvRequests.Size = new System.Drawing.Size(573, 303);
+            this.lvRequests.Size = new System.Drawing.Size(660, 303);
             this.lvRequests.TabIndex = 7;
             this.lvRequests.UseCompatibleStateImageBehavior = false;
             this.lvRequests.View = System.Windows.Forms.View.Details;
@@ -155,20 +166,26 @@
             // columnUrl
             // 
             this.columnUrl.Text = "Url";
-            this.columnUrl.Width = 250;
+            this.columnUrl.Width = 300;
             // 
             // columnStatus
             // 
             this.columnStatus.Text = "Status";
+            this.columnStatus.Width = 70;
+            // 
+            // columnHttpStatus
+            // 
+            this.columnHttpStatus.Text = "Http Status";
+            this.columnHttpStatus.Width = 100;
             // 
             // columnTime
             // 
-            this.columnTime.DisplayIndex = 2;
             this.columnTime.Text = "Time";
+            this.columnTime.Width = 80;
             // 
             // btnStartStressTest
             // 
-            this.btnStartStressTest.Location = new System.Drawing.Point(486, 458);
+            this.btnStartStressTest.Location = new System.Drawing.Point(568, 458);
             this.btnStartStressTest.Name = "btnStartStressTest";
             this.btnStartStressTest.Size = new System.Drawing.Size(102, 29);
             this.btnStartStressTest.TabIndex = 8;
@@ -218,7 +235,7 @@
             // 
             // btnStopStressTest
             // 
-            this.btnStopStressTest.Location = new System.Drawing.Point(387, 458);
+            this.btnStopStressTest.Location = new System.Drawing.Point(469, 458);
             this.btnStopStressTest.Name = "btnStopStressTest";
             this.btnStopStressTest.Size = new System.Drawing.Size(93, 29);
             this.btnStopStressTest.TabIndex = 12;
@@ -306,16 +323,78 @@
             this.label11.TabIndex = 17;
             this.label11.Text = "Total Requests:";
             // 
-            // columnHttpStatus
+            // statusBar
             // 
-            this.columnHttpStatus.Text = "Http Status";
-            this.columnHttpStatus.Width = 67;
+            this.statusBar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripStatusInfo,
+            this.toolStripStatusCpu,
+            this.toolStripStatusAvailableMemory});
+            this.statusBar.Location = new System.Drawing.Point(0, 497);
+            this.statusBar.Name = "statusBar";
+            this.statusBar.Size = new System.Drawing.Size(684, 22);
+            this.statusBar.TabIndex = 21;
+            this.statusBar.Text = "Ready";
+            // 
+            // toolStripStatusInfo
+            // 
+            this.toolStripStatusInfo.AutoSize = false;
+            this.toolStripStatusInfo.Name = "toolStripStatusInfo";
+            this.toolStripStatusInfo.Size = new System.Drawing.Size(350, 17);
+            this.toolStripStatusInfo.Text = "Ready";
+            this.toolStripStatusInfo.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.toolStripStatusInfo.ToolTipText = "Status Information";
+            // 
+            // toolStripStatusCpu
+            // 
+            this.toolStripStatusCpu.AutoSize = false;
+            this.toolStripStatusCpu.Image = ((System.Drawing.Image)(resources.GetObject("toolStripStatusCpu.Image")));
+            this.toolStripStatusCpu.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.toolStripStatusCpu.Name = "toolStripStatusCpu";
+            this.toolStripStatusCpu.Size = new System.Drawing.Size(120, 17);
+            this.toolStripStatusCpu.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.toolStripStatusCpu.ToolTipText = "Cpu Usage";
+            // 
+            // toolStripStatusAvailableMemory
+            // 
+            this.toolStripStatusAvailableMemory.AutoSize = false;
+            this.toolStripStatusAvailableMemory.Name = "toolStripStatusAvailableMemory";
+            this.toolStripStatusAvailableMemory.Size = new System.Drawing.Size(200, 17);
+            // 
+            // cpuImageList
+            // 
+            this.cpuImageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("cpuImageList.ImageStream")));
+            this.cpuImageList.TransparentColor = System.Drawing.Color.Transparent;
+            this.cpuImageList.Images.SetKeyName(0, "Mem1.ICO");
+            this.cpuImageList.Images.SetKeyName(1, "Mem2.ICO");
+            this.cpuImageList.Images.SetKeyName(2, "Mem3.ICO");
+            this.cpuImageList.Images.SetKeyName(3, "Mem4.ICO");
+            this.cpuImageList.Images.SetKeyName(4, "Mem5.ICO");
+            this.cpuImageList.Images.SetKeyName(5, "Mem6.ICO");
+            this.cpuImageList.Images.SetKeyName(6, "Mem7.ICO");
+            this.cpuImageList.Images.SetKeyName(7, "Mem8.ICO");
+            this.cpuImageList.Images.SetKeyName(8, "Mem9.ICO");
+            this.cpuImageList.Images.SetKeyName(9, "Mem10.ICO");
+            this.cpuImageList.Images.SetKeyName(10, "Mem11.ICO");
+            // 
+            // timerPerformanceInfo
+            // 
+            this.timerPerformanceInfo.Enabled = true;
+            this.timerPerformanceInfo.Interval = 2000;
+            this.timerPerformanceInfo.Tick += new System.EventHandler(this.timerPerformanceInfo_Tick);
+            // 
+            // performanceToolStripMenuItem
+            // 
+            this.performanceToolStripMenuItem.Name = "performanceToolStripMenuItem";
+            this.performanceToolStripMenuItem.Size = new System.Drawing.Size(87, 20);
+            this.performanceToolStripMenuItem.Text = "Performance";
+            this.performanceToolStripMenuItem.Click += new System.EventHandler(this.performanceToolStripMenuItem_Click);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(597, 493);
+            this.ClientSize = new System.Drawing.Size(684, 519);
+            this.Controls.Add(this.statusBar);
             this.Controls.Add(this.lblSuccessfulRequestsCount);
             this.Controls.Add(this.label9);
             this.Controls.Add(this.lblTotalRequestsCount);
@@ -337,13 +416,17 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.mtxtMaxConcurrentRequests);
             this.Controls.Add(this.mainMenuStrip);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MainMenuStrip = this.mainMenuStrip;
+            this.MaximizeBox = false;
             this.Name = "MainForm";
             this.Text = "Labo Stress Test Tool";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.mainMenuStrip.ResumeLayout(false);
             this.mainMenuStrip.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudDurationInMinutes)).EndInit();
+            this.statusBar.ResumeLayout(false);
+            this.statusBar.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -377,6 +460,13 @@
         private System.Windows.Forms.Label lblTotalRequestsCount;
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.ColumnHeader columnHttpStatus;
+        private System.Windows.Forms.StatusStrip statusBar;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusInfo;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusCpu;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusAvailableMemory;
+        private System.Windows.Forms.ImageList cpuImageList;
+        private System.Windows.Forms.Timer timerPerformanceInfo;
+        private System.Windows.Forms.ToolStripMenuItem performanceToolStripMenuItem;
     }
 }
 
